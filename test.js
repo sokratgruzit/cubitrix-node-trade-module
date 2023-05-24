@@ -2,6 +2,8 @@ const express = require('express');
 const mongoose = require('mongoose');
 const router = require("./routes/index");
 const cors = require('cors');
+const cors_options = require("./config/cors_options");
+const credentials = require("./middlewares/credentials");
 
 require('dotenv').config();
 
@@ -10,23 +12,8 @@ app.use(express.json({ extended: true }));
 app.use(cors());
 
 app.use("/api", router);
-// console.log(accounts.index("jinx1"));
-// app.use('/accounts', router)
-
-
-
-// const auth = require('./modules/auth/routes/index.routes');
-// const staking = require('./modules/staking/routes/index.routes');
-
-
-//load modules depend env file
-// if(process.env.AUTH === 'true') app.use('/api/auth', auth);
-// if(process.env.STAKING === 'true') app.use('/api/staking', staking);
-
-// //test route
-// app.get("/test", (req, res) => {
-//    res.send("server is working");
-// });
+app.use(credentials);
+app.use(cors(cors_options));
 
 //static path
 const root = require('path').join(__dirname, 'front', 'build')
@@ -40,6 +27,7 @@ app.get("*", function (req, res) {
 
 async function start() {
    const PORT = process.env.PORT || 5000;
+   
    try {
       mongoose.set("strictQuery", false);
       await mongoose.connect(process.env.MONGO_URL, {
